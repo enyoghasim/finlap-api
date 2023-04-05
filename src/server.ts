@@ -67,7 +67,7 @@ const server = (): void => {
   app.get("/health", (_, res: Response) => {
     return res.status(200).json({
       status: "success",
-      message: "easy win api is up and running 🚀",
+      message: "finlap api is up and running 🚀",
     });
   });
 
