@@ -99,4 +99,22 @@ router.post(
   }
 );
 
+router.post(
+  "/verify/resend",
+  async (
+    req: Request<
+      {},
+      {},
+      {
+        email: string;
+      }
+    >,
+    res: Response
+  ) => {
+    if (!req.body.email) {
+      return sendErrorResponse(res, 400, "Email is required");
+    }
+  }
+);
+
 export default router;

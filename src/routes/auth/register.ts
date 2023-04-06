@@ -87,7 +87,7 @@ router.post(
           );
         }
 
-        if (userDetails.userTag === userTag) {
+        if (userDetails.userTag.toLowerCase() === userTag.toLowerCase()) {
           return sendErrorResponse(
             res,
             400,
@@ -150,7 +150,7 @@ router.post(
       sendSuccessResponse(res, 201, null, "User created successfully");
     } catch (err) {
       console.error(err);
-      return sendErrorResponse(res);
+      return sendErrorResponse(res, 500, "Something went wrong");
     }
   }
 );
