@@ -73,7 +73,7 @@ router.post(
         );
       }
 
-      const usernameRegex = caseInSensitiveRegex(userTag);
+      const usernameRegex: RegExp = caseInSensitiveRegex(userTag);
       const userDetails: IUser | null = await Users.findOne({
         $or: [{ email }, { userTag: { $regex: usernameRegex } }],
       });
