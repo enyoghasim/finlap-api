@@ -73,10 +73,10 @@ router.post(
         );
       }
 
-      const usernameRegex: RegExp = caseInSensitiveRegex(userTag);
+      const userTagRegex: RegExp = caseInSensitiveRegex(userTag);
 
       const userDetails: IUser | null = await Users.findOne({
-        $or: [{ email }, { userTag: { $regex: usernameRegex } }],
+        $or: [{ email }, { userTag: { $regex: userTagRegex } }],
       });
 
       if (userDetails) {
@@ -108,8 +108,8 @@ router.post(
         password: hashedPassword,
       });
 
-      const selector = generateRandomToken();
-      const token = generateRandomToken();
+      const selector: string = generateRandomToken();
+      const token: string = generateRandomToken();
 
       const hashedToken = await hash(token, salt);
 

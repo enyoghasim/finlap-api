@@ -10,8 +10,8 @@ export const isEmpty = (...args: string[]): boolean => {
 };
 
 export const isValidUsername = (val: string): boolean => {
-  const usernameRegex = /^[a-zA-Z0-9_.]+$/;
-  return usernameRegex.test(val);
+  const userTagRegex = /^[a-zA-Z0-9_.]+$/;
+  return userTagRegex.test(val);
 };
 
 export const isValidName = (name: string): boolean => {
