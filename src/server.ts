@@ -88,6 +88,8 @@ const server = (): void => {
       httpServer.keepAliveTimeout = 605 * 1000; // 605 seconds
       httpServer.headersTimeout = 606 * 1000;
     })
+    // TODO - LOGOUT USERS FROM ALL OTHER SESSIONS AFTER A SUCCESSFULL PASSWORD CHANGE
+
     // .then((e: any) => {
     //   sessionStore.all((err, sessions) => {
     //     if (err) {
