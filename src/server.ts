@@ -5,8 +5,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import Mongoose from "./controllers/mongoose";
 import Routes from "./routes/index";
-import session from "express-session";
-import MongoStore from "connect-mongo";
+import session, { SessionData } from "express-session";
+import sessionStore from "./controllers/session";
 
 const server = (): void => {
   const app: Express = express();
@@ -42,11 +42,6 @@ const server = (): void => {
   app.use(cors());
 
   app.set("trust proxy", 1); // trust first proxy
-
-  const sessionStore = MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI!,
-    collectionName: "sessions",
-  });
 
   app.use(
     session({
@@ -93,7 +88,28 @@ const server = (): void => {
       httpServer.keepAliveTimeout = 605 * 1000; // 605 seconds
       httpServer.headersTimeout = 606 * 1000;
     })
-
+    // .then((e: any) => {
+    //   sessionStore.all((err, sessions) => {
+    //     if (err) {
+    //       console.log(err);
+    //     } else {
+    //       if (!sessions || !sessions.length || !Array.isArray(sessions)) {
+    //         return;
+    //       }
+    //       sessions.forEach((session) => {
+    //         const sessionData = session as unknown as SessionData;
+    //         const sessionId = sessionData.sessionID;
+    //         // if (session.user === user._id.toString()) {
+    //         //   sessionStore.destroy(session.sessionId, (err) => {
+    //         //     if (err) {
+    //         //       console.log(err);
+    //         //     }
+    //         //   });
+    //         // }
+    //       });
+    //     }
+    //   });
+    // })
     .catch((e: any) => {
       console.log(e);
     });

@@ -12,3 +12,7 @@ export const EMAIL_VERIFICATION = {
   name: "email-verification",
   subject: "[Finlap] - Verify your email",
 };
+export const RESET_PASSWORD_REQUEST = {
+  name: "reset-password-request",
+  subject: "[Finlap] - Reset your password",
+};

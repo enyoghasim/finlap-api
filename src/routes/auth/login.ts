@@ -6,8 +6,8 @@ import { compare } from "bcrypt";
 
 const router: Router = Router();
 
-router.use(
-  "/login",
+router.post(
+  "/",
   async (
     req: Request<
       {},
@@ -25,6 +25,10 @@ router.use(
 
       if (!email?.trim() || !password?.trim()) {
         return sendErrorResponse(res, 400, "All fields are required");
+      }
+
+      if (password.length < 6) {
+        return sendErrorResponse(res, 400, "Invalid email or password");
       }
 
       const userTagRegex = caseInSensitiveRegex(email);

@@ -29,10 +29,7 @@ const limiter = RateLimit({
 router.post(
   "/verify/:selector/:token",
   limiter,
-  async (
-    req: Request<{ selector: string; token: string }, {}, {}>,
-    res: Response
-  ) => {
+  async (req: Request<{ selector: string; token: string }>, res: Response) => {
     try {
       const { selector, token } = req.params;
 
@@ -54,7 +51,7 @@ router.post(
       }
 
       if (verificationToken.expiresAt.getTime() < new Date().getTime()) {
-        await verificationToken.deleteOne({
+        await VerificationTokens.deleteMany({
           _id: verificationToken._id,
         });
 
@@ -74,9 +71,8 @@ router.post(
       if (!user) {
         return sendErrorResponse(res, 404, "Invalid verification link");
       }
-
       if (user.isEmailVerified) {
-        await verificationToken.deleteOne({
+        await VerificationTokens.deleteMany({
           _id: verificationToken._id,
         });
         return sendErrorResponse(res, 400, "Email already verified");
@@ -85,7 +81,7 @@ router.post(
       user.isEmailVerified = true;
       await user.save();
 
-      await verificationToken.deleteOne({
+      await VerificationTokens.deleteMany({
         _id: verificationToken._id,
       });
 
