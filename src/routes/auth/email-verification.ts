@@ -5,10 +5,9 @@ import isHexadecimal from "validator/lib/isHexadecimal";
 import VerificationTokens from "../../models/verification-token.model";
 import Users, { IUser } from "../../models/user.model";
 import { compare, genSalt, hash } from "bcrypt";
-import isEmail from "validator/lib/isEmail";
 import { caseInSensitiveRegex, generateRandomToken } from "../../utils/helpers";
 import mailer from "../../controllers/mailer";
-import { EMAIL_VERIFICATION, WELCOME_VERIFICATION } from "../../views/emails";
+import { EMAIL_VERIFICATION } from "../../views/emails";
 
 const router: Router = Router();
 
@@ -30,10 +29,7 @@ const limiter = RateLimit({
 router.post(
   "/verify/:selector/:token",
   limiter,
-  async (
-    req: Request<{ selector: string; token: string }, {}, {}>,
-    res: Response
-  ) => {
+  async (req: Request<{ selector: string; token: string }>, res: Response) => {
     try {
       const { selector, token } = req.params;
 
@@ -55,7 +51,7 @@ router.post(
       }
 
       if (verificationToken.expiresAt.getTime() < new Date().getTime()) {
-        await verificationToken.deleteOne({
+        await VerificationTokens.deleteMany({
           _id: verificationToken._id,
         });
 
@@ -75,9 +71,8 @@ router.post(
       if (!user) {
         return sendErrorResponse(res, 404, "Invalid verification link");
       }
-
       if (user.isEmailVerified) {
-        await verificationToken.deleteOne({
+        await VerificationTokens.deleteMany({
           _id: verificationToken._id,
         });
         return sendErrorResponse(res, 400, "Email already verified");
@@ -86,7 +81,7 @@ router.post(
       user.isEmailVerified = true;
       await user.save();
 
-      await verificationToken.deleteOne({
+      await VerificationTokens.deleteMany({
         _id: verificationToken._id,
       });
 
@@ -121,7 +116,7 @@ router.post(
       email = email?.toLowerCase();
 
       if (!email?.trim()) {
-        return sendErrorResponse(res, 400, "Email is required");
+        return sendErrorResponse(res, 400, "username/email is required");
       }
 
       const userTagRegex: RegExp = caseInSensitiveRegex(email);
