@@ -16,7 +16,7 @@ export const isValidUsername = (val: string): boolean => {
 
 export const isValidName = (name: string): boolean => {
   // const nameRegex = /^[a-zA-Z ]+$/;
-  return /^[a-zA-Z ]+$/.test(name);
+  return /^[a-zA-Z ]{3,}$/.test(name);
 };
 
 export const caseInSensitiveRegex = (val: string): RegExp => {

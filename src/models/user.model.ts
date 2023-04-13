@@ -6,12 +6,19 @@ export interface IUser extends Document {
   userTag: string;
   email: string;
   isEmailVerified: boolean;
+  isIdentityVerified: boolean;
   password: string;
   balance: number;
   bvn: string;
   nin: string;
   referrer: Schema.Types.ObjectId;
   referrals: Schema.Types.ObjectId[];
+  beneficialBankAccounts: Array<{
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+    bankCode: string;
+  }>;
   qr: {
     url: string;
     type: string;
@@ -39,6 +46,10 @@ const UserSchema = new Schema({
     lowercase: true,
   },
   isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  isIdentityVerified: {
     type: Boolean,
     default: false,
   },
@@ -77,6 +88,15 @@ const UserSchema = new Schema({
         required: true,
       },
     }),
+  },
+  beneficialBankAccounts: {
+    type: Array<{
+      accountName: string;
+      accountNumber: string;
+      bankName: string;
+      bankCode: string;
+    }>,
+    default: [],
   },
   created: {
     type: Date,

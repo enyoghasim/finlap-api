@@ -7,6 +7,8 @@ import Mongoose from "./controllers/mongoose";
 import Routes from "./routes/index";
 import session, { SessionData } from "express-session";
 import sessionStore from "./controllers/session";
+import { sendSuccessResponse } from "./utils/response";
+import flutterwave from "./service/flutterwave";
 
 const server = (): void => {
   const app: Express = express();
@@ -60,10 +62,12 @@ const server = (): void => {
   );
 
   app.get("/health", (_, res: Response) => {
-    return res.status(200).json({
-      status: "success",
-      message: "finlap api is up and running 🚀",
-    });
+    return sendSuccessResponse(
+      res,
+      200,
+      null,
+      "finlap api is up and running 🚀"
+    );
   });
 
   app.use("/api", Routes);
