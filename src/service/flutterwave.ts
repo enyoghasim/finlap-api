@@ -120,6 +120,8 @@ class Flutterwave {
   };
 
   //   createVirtualAccountNumber = async (): Promise<{}> => {};
+
+  //   createVirtualCard = async (): Promise<{}> => {};
 }
 
 export default new Flutterwave();
