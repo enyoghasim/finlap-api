@@ -204,4 +204,74 @@ router.post(
   }
 );
 
+router.post(
+  "/update",
+  limiter,
+  async (
+    req: Request<
+      {},
+      {},
+      {
+        password: string;
+        newPassword: string;
+      }
+    >,
+    res: Response
+  ) => {
+    try {
+      const _id = req.session?.user?._id;
+      const { password, newPassword } = req.body;
+
+      if (!password || !newPassword) {
+        return sendErrorResponse(res, 400, "All fields are required");
+      }
+
+      if (password.length < 6 || newPassword.length < 6) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Password must be at least 6 characters long"
+        );
+      }
+
+      const userDetails = await Users.findOne({
+        _id,
+      });
+
+      if (!userDetails) {
+        return sendErrorResponse(res, 404, "User not found");
+      }
+
+      const isValid = await compare(password, userDetails.password);
+
+      if (!isValid) {
+        return sendErrorResponse(res, 400, "Invalid password");
+      }
+
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(newPassword, salt);
+
+      const updatedUser = await Users.updateOne(
+        {
+          _id,
+        },
+        {
+          $set: {
+            password: hashedPassword,
+          },
+        }
+      );
+
+      if (!updatedUser) {
+        return sendErrorResponse(res);
+      }
+
+      return sendSuccessResponse(res, 200, null, "Password updated");
+    } catch (err) {
+      console.log(err);
+      return sendErrorResponse(res);
+    }
+  }
+);
+
 export default router;
