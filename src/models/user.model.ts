@@ -16,6 +16,7 @@ export interface IUser extends Document {
     url: string;
     type: string;
   };
+  created: Date;
 }
 
 const UserSchema = new Schema({
@@ -76,6 +77,10 @@ const UserSchema = new Schema({
         required: true,
       },
     }),
+  },
+  created: {
+    type: Date,
+    default: Date.now,
   },
 });
 
