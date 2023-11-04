@@ -5,12 +5,13 @@ import { caseInSensitiveRegex, generateRandomToken } from "../../utils/helpers";
 import Users, { IUser } from "../../models/user.model";
 import VerificationTokens from "../../models/verification-token.model";
 import { compare, genSalt, hash } from "bcrypt";
-import mailer from "../../controllers/mailer";
+import Mailer from "../../controllers/mailer";
 import { RESET_PASSWORD_REQUEST } from "../../views/emails";
 import isHexadecimal from "validator/lib/isHexadecimal";
 import sessionStore from "../../controllers/session";
 
 const router: Router = Router();
+const mailer = new Mailer();
 
 const rateLimitHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(429).json({

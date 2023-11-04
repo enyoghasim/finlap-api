@@ -14,6 +14,7 @@ class Flutterwave {
     this.Axios.defaults.headers.common[
       "Authorization"
     ] = `Bearer ${this.secretKey}`;
+    this.Axios.defaults.baseURL = this.baseUrl;
   }
 
   resolveBvn = async (bvn: string): Promise<any> => {
@@ -25,9 +26,7 @@ class Flutterwave {
             status: "error",
           });
         }
-        const { data } = await this.Axios.get(
-          `${this.baseUrl}/kyc/bvns/${bvn}`
-        );
+        const { data } = await this.Axios.get(`/kyc/bvns/${bvn}`);
 
         if (data.status === "success") {
           return resolve(data.data);
@@ -66,13 +65,10 @@ class Flutterwave {
             status: "error",
           });
         }
-        const { data } = await this.Axios.post(
-          `${this.baseUrl}/accounts/resolve/`,
-          {
-            account_number: accounNumber,
-            account_bank: bank,
-          }
-        );
+        const { data } = await this.Axios.post(`/accounts/resolve/`, {
+          account_number: accounNumber,
+          account_bank: bank,
+        });
 
         if (data.status === "success") {
           return resolve(data);
@@ -89,6 +85,51 @@ class Flutterwave {
     });
   };
 
+  initiateBVNConsent = async ({
+    bvn,
+    firstname,
+    lastname,
+    redirectUrl,
+  }: {
+    bvn: string;
+    firstname: string;
+    lastname: string;
+    redirectUrl: string;
+  }): Promise<{
+    status: string;
+    message: string;
+    data?: {
+      url: string;
+      reference: string;
+    };
+  }> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { data } = await this.Axios.post(`/bvn/verifications`, {
+          bvn,
+          firstname,
+          lastname,
+          redirect_url: redirectUrl,
+        });
+
+        if (data.status === "success") {
+          return resolve(data);
+        } else {
+          return reject({
+            message: data.message ?? "Unable to initiate bvn consent",
+            status: data.status ?? "error",
+          });
+        }
+      } catch (err: any) {
+        console.log("flutterwave:", err);
+        return reject({
+          message: "Unable to get banks",
+          status: err.response.data.status ?? "error",
+        });
+      }
+    });
+  };
+
   getBanks = async (): Promise<{
     status: string;
     message: string;
@@ -100,7 +141,7 @@ class Flutterwave {
   }> => {
     return new Promise(async (resolve, reject) => {
       try {
-        const { data } = await this.Axios.get(`${this.baseUrl}/banks/NG`);
+        const { data } = await this.Axios.get(`/banks/NG`);
         if (data.status === "success") {
           return resolve(data);
         } else {
@@ -119,9 +160,45 @@ class Flutterwave {
     });
   };
 
-  //   createVirtualAccountNumber = async (): Promise<{}> => {};
+  createVirtualAccountNumber = async ({
+    email,
+    bvn,
+    isPermanent = true,
+  }: {
+    email: string;
+    bvn: string;
+    isPermanent?: boolean;
+  }): Promise<{
+    status: string;
+    message: string;
+    data?: any;
+  }> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { data } = await this.Axios.post(`/virtual-account-numbers`, {
+          email,
+          bvn,
+          is_permanent: isPermanent,
+        });
+        if (data.status === "success") {
+          return resolve(data);
+        } else {
+          return reject({
+            message: "Unable to get banks",
+            status: data.status,
+          });
+        }
+      } catch (err: any) {
+        console.log("flutterwave:", err);
+        return reject({
+          message: "Unable to get banks",
+          status: err.response.data.status ?? "error",
+        });
+      }
+    });
+  };
 
   //   createVirtualCard = async (): Promise<{}> => {};
 }
 
-export default new Flutterwave();
+export default Flutterwave;

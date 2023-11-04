@@ -8,7 +8,7 @@ import Routes from "./routes/index";
 import session, { SessionData } from "express-session";
 import sessionStore from "./controllers/session";
 import { sendSuccessResponse } from "./utils/response";
-import flutterwave from "./service/flutterwave";
+import Flutterwave from "./service/flutterwave";
 
 const server = (): void => {
   const app: Express = express();
@@ -83,15 +83,27 @@ const server = (): void => {
         console.log(`[Server] started on  http://localhost:${port}`);
       });
 
-      httpServer.setTimeout = 605 * 1000; // 605 seconds
-
-      /*
-       * Ensure all inactive connections are terminated by the ALB,
-       * by setting this a few seconds higher than the ALB idle timeout
-       */
-      httpServer.keepAliveTimeout = 605 * 1000; // 605 seconds
+      httpServer.setTimeout = 605 * 1000;
+      httpServer.keepAliveTimeout = 605 * 1000;
       httpServer.headersTimeout = 606 * 1000;
     })
+    // .then(async () => {
+    //   const flutterwave = new Flutterwave();
+
+    //   const banks = await flutterwave.createVirtualAccountNumber({
+    //     bvn: "12345678001",
+    //     email: "eex@xee.xdo",
+    //   });
+    //   // const banks = await flutterwave.getBanks();
+
+    //   if (banks.status === "success") {
+    //     console.log("banks fetched successfully");
+    //     console.log(banks.data);
+    //   } else {
+    //     console.log("unable to fetch banks");
+    //   }
+    // })
+
     // TODO - LOGOUT USERS FROM ALL OTHER SESSIONS AFTER A SUCCESSFULL PASSWORD CHANGE
 
     // .then((e: any) => {

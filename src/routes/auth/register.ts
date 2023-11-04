@@ -11,10 +11,11 @@ import {
 import isEmail from "validator/lib/isEmail";
 import Users, { IUser } from "../../models/user.model";
 import VerificationTokens from "../../models/verification-token.model";
-import mailer from "../../controllers/mailer";
+import Mailer from "../../controllers/mailer";
 import { WELCOME_VERIFICATION } from "../../views/emails";
 
 const router: Router = Router();
+const mailer = new Mailer();
 
 router.post(
   "/",

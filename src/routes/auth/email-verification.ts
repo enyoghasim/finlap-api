@@ -6,10 +6,11 @@ import VerificationTokens from "../../models/verification-token.model";
 import Users, { IUser } from "../../models/user.model";
 import { compare, genSalt, hash } from "bcrypt";
 import { caseInSensitiveRegex, generateRandomToken } from "../../utils/helpers";
-import mailer from "../../controllers/mailer";
+import Mailer from "../../controllers/mailer";
 import { EMAIL_VERIFICATION } from "../../views/emails";
 
 const router: Router = Router();
+const mailer = new Mailer();
 
 const rateLimitHandler = (req: Request, res: Response, next: NextFunction) => {
   res.status(429).json({

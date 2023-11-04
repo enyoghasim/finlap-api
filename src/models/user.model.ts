@@ -7,10 +7,18 @@ export interface IUser extends Document {
   email: string;
   isEmailVerified: boolean;
   isIdentityVerified: boolean;
+  identityVerificationStatus: string;
   password: string;
   balance: number;
   bvn: string;
-  nin: string;
+  accountDetails: {
+    number: string;
+    bankName: string;
+    flwRef: string;
+    orderRef: string;
+    createdAt: Date;
+  };
+  // nin: string;
   referrer: Schema.Types.ObjectId;
   referrals: Schema.Types.ObjectId[];
   beneficialBankAccounts: Array<{
@@ -19,10 +27,6 @@ export interface IUser extends Document {
     bankName: string;
     bankCode: string;
   }>;
-  qr: {
-    url: string;
-    type: string;
-  };
   created: Date;
 }
 
@@ -53,9 +57,15 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  identityVerificationStatus: {
+    type: String,
+    default: "not-submited",
+    enum: ["not-submited", "pending", "approved", "rejected"],
+  },
   password: {
     type: String,
     required: true,
+    select: false,
   },
   balance: {
     type: Number,
@@ -64,30 +74,24 @@ const UserSchema = new Schema({
   },
   bvn: {
     type: String,
+    select: false,
   },
-  nin: {
-    type: String,
+  accountDetails: {
+    type: Object,
+    default: null,
   },
+  // nin: {
+  //   type: String,
+  //   select: false,
+  // },
   referrer: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     default: null,
   },
   referrals: {
     type: [Schema.Types.ObjectId],
-    ref: "User",
-  },
-  qr: {
-    type: new Schema({
-      url: {
-        type: String,
-        required: true,
-      },
-      type: {
-        type: String,
-        required: true,
-      },
-    }),
+    ref: "Users",
   },
   beneficialBankAccounts: {
     type: Array<{
@@ -104,4 +108,4 @@ const UserSchema = new Schema({
   },
 });
 
-export default model<IUser>("User", UserSchema);
+export default model<IUser>("Users", UserSchema);

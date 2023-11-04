@@ -84,4 +84,4 @@ class Mailer {
   };
 }
 
-export default new Mailer();
+export default Mailer;

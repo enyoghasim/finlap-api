@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import Users from "../../models/user.model";
+import Users, { IUser } from "../../models/user.model";
 import {
   capitalizeFirstLetter,
   caseInSensitiveRegex,
@@ -11,10 +11,13 @@ import isEmail from "validator/lib/isEmail";
 import { sendErrorResponse, sendSuccessResponse } from "../../utils/response";
 import VerificationTokens from "../../models/verification-token.model";
 import { genSalt, hash } from "bcrypt";
-import mailer from "../../controllers/mailer";
+import Mailer from "../../controllers/mailer";
 import { EMAIL_VERIFICATION } from "../../views/emails";
+import Flutterwave from "../../service/flutterwave";
+import PendingBvnVerifications from "../../models/pending-bvn-verifications";
 
 const router: Router = Router();
+const mailer = new Mailer();
 
 router.use("/", (req: Request, res: Response, next: NextFunction) => {
   if (!req.session.user) {
@@ -48,7 +51,6 @@ router.get("/profile", async (req: Request, res: Response) => {
           email: user.email,
           isEmailVerified: user.isEmailVerified,
           balance: user.balance.toFixed(2),
-          qr: user.qr,
           identityVerified: user.isIdentityVerified,
         },
       },
@@ -254,7 +256,6 @@ router.put(
           email: updatedUser.email,
           isEmailVerified: updatedUser.isEmailVerified,
           balance: updatedUser.balance.toFixed(2),
-          qr: updatedUser.qr,
           identityVerified: updatedUser.isIdentityVerified,
         },
         `User updated successfully${
@@ -288,8 +289,99 @@ router.post(
 
       const { bvn } = req.body;
 
-      if (!bvn) {
+      if (!bvn?.trim()) {
         return sendErrorResponse(res, 400, "BVN is required");
+      }
+
+      if (bvn.length !== 11 || !/^\d+$/.test(bvn)) {
+        return sendErrorResponse(res, 400, "Invalid BVN");
+      }
+
+      const userDetails: IUser | null = await Users.findOne({
+        _id,
+      });
+
+      if (!userDetails) {
+        return sendErrorResponse(res, 404, "User not found");
+      }
+
+      if (userDetails.isIdentityVerified) {
+        return sendErrorResponse(res, 400, "Account already verified");
+      }
+
+      if (userDetails.isEmailVerified === false) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Please verify your email address first"
+        );
+      }
+
+      if (userDetails.identityVerificationStatus === "pending") {
+        return sendErrorResponse(
+          res,
+          400,
+          "Verification is already in progress"
+        );
+      }
+
+      const userWithBVN: IUser | null = await Users.findOne({
+        bvn,
+      });
+
+      if (userWithBVN && userWithBVN._id.toString() !== _id.toString()) {
+        return sendErrorResponse(
+          res,
+          400,
+          "BVN already in use by another user"
+        );
+      }
+
+      const flutterwave = new Flutterwave();
+
+      const bvnDetails = await flutterwave.initiateBVNConsent({
+        bvn,
+        firstname: userDetails.firstname,
+        lastname: userDetails.lastname,
+        redirectUrl: `${process.env.FRONTEND_URL}`,
+      });
+
+      if (bvnDetails.status === "success") {
+        // check if there is a pending verification for this user
+        const pendingVerification = await PendingBvnVerifications.findOne({
+          user: _id,
+        });
+
+        if (pendingVerification) {
+          pendingVerification.bvn = bvn;
+          pendingVerification.reference = bvnDetails.data?.reference ?? "";
+          pendingVerification.created = new Date();
+          await pendingVerification.save();
+        } else {
+          const newPendingVerification = new PendingBvnVerifications({
+            user: _id,
+            bvn,
+            reference: bvnDetails.data?.reference ?? "",
+            created: new Date(),
+          });
+
+          await newPendingVerification.save();
+        }
+
+        return sendSuccessResponse(
+          res,
+          200,
+          {
+            consentUrl: bvnDetails.data?.url,
+          },
+          "BVN verification initiated"
+        );
+      } else {
+        return sendErrorResponse(
+          res,
+          400,
+          bvnDetails.message ?? "unable to initiate BVN verification"
+        );
       }
     } catch (e) {
       console.log(e);

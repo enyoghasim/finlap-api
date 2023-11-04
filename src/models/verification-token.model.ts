@@ -13,7 +13,7 @@ const verificationTokenSchema = new Schema<IVerificationToken>(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
     },
     token: {
       type: String,
@@ -41,6 +41,6 @@ const verificationTokenSchema = new Schema<IVerificationToken>(
 );
 
 export default model<IVerificationToken>(
-  "verificationToken",
+  "verificationTokens",
   verificationTokenSchema
 );
